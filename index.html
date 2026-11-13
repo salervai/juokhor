@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="bn" id="htmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>জুয়াখোর - JuoKhor</title>
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Hind+Siliguri:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --card-border: #d1d5db;
+            --primary-glow: #7c3aed;
+            --accent-cyan: #0d9488;
+            --accent-green: #16a34a;
+            --accent-pink: #db2777;
+            --accent-yellow: #ca8a04;
+            --text-main: #111827;
+            --text-muted: #4b5563;
+            --nav-height: 65px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', 'Hind Siliguri', sans-serif;
+            scrollbar-width: thin;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: var(--nav-height);
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+            min-height: 100vh;
+            background: var(--bg-color);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+            border-left: 1px solid #e5e7eb;
+            border-right: 1px solid #e5e7eb;
+        }
+
+        @media (min-width: 768px) {
+            .app-container { max-width: 750px; }
+        }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #1f2937;
+            border: 1px solid var(--accent-cyan);
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-size: 13px;
+            z-index: 5000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* Header Styling */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        .hamburger-btn, .notification-btn, .lang-header-btn {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            color: var(--text-main);
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .hamburger-btn:hover, .notification-btn:hover, .lang-header-btn:hover { background: #e5e7eb; }
+
+        .header-right-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-area { text-align: center; cursor: pointer; }
+        .logo-title {
+            font-size: 22px;
+            font-weight: 800;
+            font-style: italic;
+            background: linear-gradient(90deg, #9333ea, #db2777);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+        }
+        .logo-subtitle {
+            font-size: 9px;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Hamburger Drawer */
+        #hamburgerDrawer {
+            position: fixed;
+            top: 0; left: -100%;
+            width: 280px; height: 100%;
+            background: #ffffff;
+            border-right: 2px solid #e5e7eb;
+            z-index: 4000;
+            transition: 0.3s ease;
+            padding: 20px;
+            box-shadow: 5px 0 25px rgba(0,0,0,0.15);
+            overflow-y: auto;
+        }
+        #hamburgerDrawer.open { left: 0; }
+        .drawer-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;
+        }
+        .drawer-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+        }
+        .drawer-card {
+            background: #f9fafb; border: 1px solid #d1d5db;
+            padding: 12px 8px; border-radius: 10px; text-align: center; cursor: pointer;
+            transition: 0.2s;
+        }
+        .drawer-card:hover { border-color: var(--primary-glow); background: #f3f4f6; }
+        .drawer-card i { font-size: 18px; color: var(--primary-glow); margin-bottom: 5px; display: block; }
+        .drawer-card span { font-size: 11px; font-weight: 600; color: var(--text-main); }
+
+        /* Search Bar */
+        .search-box-wrapper { padding: 12px 16px 4px; }
+        .search-container { position: relative; display: flex; align-items: center; }
+        .search-container input {
+            width: 100%; padding: 10px 16px 10px 42px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1; border-radius: 20px;
+            color: var(--text-main); font-size: 13px; outline: none;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        .search-container input:focus { border-color: var(--primary-glow); box-shadow: 0 0 8px rgba(124,58,237,0.2); }
+        .search-container i.fa-search { position: absolute; left: 16px; color: var(--text-muted); font-size: 14px; }
+
+        /* Hero Banner Container */
+        .banner-section { padding: 10px 16px; }
+        .hero-banner-container {
+            background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .hero-slider {
+            position: relative; height: 130px; border-radius: 10px; overflow: hidden;
+            touch-action: pan-y; background: #e2e8f0;
+            display: flex; scroll-snap-type: x mandatory; overflow-x: auto; scrollbar-width: none;
+        }
+        .hero-slider::-webkit-scrollbar { display: none; }
+        .slide {
+            min-width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            display: flex; flex-direction: column; justify-content: flex-end; padding: 10px;
+            position: relative; scroll-snap-align: center; flex-shrink: 0;
+        }
+        .slide::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 75%;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); z-index: 1;
+        }
+        .slide-content { position: relative; z-index: 2; text-align: center; }
+        .slide-tag {
+            background: #db2777; color: #fff;
+            padding: 2px 8px; font-size: 9px; font-weight: 600; border-radius: 10px;
+            display: inline-block; margin-bottom: 2px;
+        }
+        .slide-title { font-size: 13px; font-weight: 700; color: #fff; }
+
+        /* 4 Square Shortcut Menus */
+        .shortcut-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 8px 16px 4px;
+        }
+        .shortcut-card {
+            background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px;
+            padding: 10px 4px; text-align: center; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .shortcut-card:hover { border-color: var(--primary-glow); background: #f8fafc; }
+        .shortcut-card i { font-size: 16px; color: var(--primary-glow); margin-bottom: 4px; display: block; }
+        .shortcut-card span { font-size: 10px; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+
+        /* Section Headings */
+        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px 6px; }
+        .section-title { font-size: 14px; font-weight: 700; color: var(--text-main); }
+        .view-all-btn {
+            font-size: 11px; font-weight: 600; color: var(--primary-glow); background: none; border: none; cursor: pointer;
+            transition: 0.2s;
+        }
+        .view-all-btn:hover { text-decoration: underline; }
+
+        /* Hub 1: Latest Updated Sites (1 post fitting screen, 5s auto scroll, scrollable rest) */
+        .latest-hub-slider {
+            padding: 0 16px; display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory;
+            padding-bottom: 6px; scrollbar-width: none;
+        }
+        .latest-hub-slider::-webkit-scrollbar { display: none; }
+        .latest-card-item {
+            min-width: 100%; scroll-snap-align: start;
+            background: var(--card-bg); border: 1px solid #e2e8f0; border-radius: 10px;
+            overflow: hidden; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.04); flex-shrink: 0;
+        }
+        .latest-thumb { width: 100%; height: 130px; background-size: cover; background-position: center; }
+        .latest-info { padding: 10px 12px; }
+        .latest-info h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+
+        /* Hub 2: Best Winning Sites (2 posts fitting screen) */
+        .winning-hub-slider {
+            padding: 0 16px; display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory;
+            padding-bottom: 6px; scrollbar-width: none;
+        }
+        .winning-hub-slider::-webkit-scrollbar { display: none; }
+        .win-card-item {
+            min-width: calc(50% - 5px); scroll-snap-align: start;
+            background: var(--card-bg); border: 1px solid #e2e8f0; border-radius: 10px;
+            overflow: hidden; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.04); flex-shrink: 0;
+        }
+        .win-thumb { width: 100%; height: 95px; background-size: cover; background-position: center; }
+        .win-info { padding: 8px 10px; }
+        .win-info h4 { font-size: 11px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Hub 3: Most Visited Sites (3 posts fitting screen) */
+        .visited-hub-slider {
+            padding: 0 16px; display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory;
+            padding-bottom: 6px; scrollbar-width: none;
+        }
+        .visited-hub-slider::-webkit-scrollbar { display: none; }
+        .visit-card-item {
+            min-width: calc(33.333% - 6px); scroll-snap-align: start;
+            background: var(--card-bg); border: 1px solid #e2e8f0; border-radius: 10px;
+            overflow: hidden; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.04); flex-shrink: 0;
+        }
+        .visit-thumb { width: 100%; height: 80px; background-size: cover; background-position: center; }
+        .visit-info { padding: 6px 8px; }
+        .visit-info h4 { font-size: 10px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Quick Social Pills */
+        .quick-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 10px 16px; }
+        @media(min-width:768px) { .quick-actions { grid-template-columns: repeat(4, 1fr); } }
+        .action-pill {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 10px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;
+            border: 1px solid #cbd5e1; cursor: pointer; color: var(--text-main); background: #ffffff;
+            transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+        .action-pill:hover { background: #f3f4f6; border-color: var(--primary-glow); }
+
+        /* Footer */
+        footer {
+            text-align: center; padding: 10px 12px 14px; font-size: 10px; color: var(--text-muted);
+            border-top: 1px solid #e5e7eb; background: #ffffff; margin-bottom: 0;
+        }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 480px; height: var(--nav-height);
+            background: #ffffff; backdrop-filter: blur(10px);
+            border-top: 1px solid #e5e7eb;
+            display: flex; justify-content: space-around; align-items: center; z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        @media (min-width: 768px) { .bottom-nav { max-width: 750px; } }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            color: var(--text-muted); text-decoration: none; font-size: 10px; gap: 3px; cursor: pointer; transition: 0.2s;
+        }
+        .nav-item i { font-size: 18px; }
+        .nav-item.active, .nav-item:hover { color: var(--primary-glow); }
+
+        /* Views Container */
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Post Details Page */
+        .post-detail-container { padding: 16px; }
+        .back-btn {
+            background: #ffffff; border: 1px solid #cbd5e1;
+            color: var(--text-main); padding: 5px 12px; border-radius: 6px; cursor: pointer; margin-bottom: 12px;
+            display: inline-flex; align-items: center; gap: 5px; font-size: 12px;
+        }
+        
+        .gallery-box-center {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px;
+            margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); text-align: center;
+        }
+        .gallery-slider {
+            display: flex; justify-content: center; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory;
+            padding-bottom: 6px; scrollbar-width: none;
+        }
+        .gallery-slider::-webkit-scrollbar { display: none; }
+        .gallery-img {
+            min-width: 130px; width: 130px; height: 95px; border-radius: 8px; background-size: cover;
+            background-position: center; border: 1px solid #cbd5e1; scroll-snap-align: center;
+        }
+
+        .lucrative-offer-box {
+            background: #fffbeb; border: 1px solid #fde047; border-radius: 12px; padding: 14px;
+            margin-bottom: 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); text-align: center;
+        }
+        .lucrative-offer-box h4 { color: #b45309; font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+        .lucrative-offer-box p { color: #78350f; font-size: 12px; line-height: 1.5; }
+
+        .detail-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
+        .detail-meta-row {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #ffffff; padding: 8px 12px; border-radius: 8px;
+            border: 1px solid #e2e8f0; margin-bottom: 12px; font-size: 11px;
+        }
+        .detail-content p { color: var(--text-muted); font-size: 12px; line-height: 1.5; margin-bottom: 12px; }
+        
+        .affiliate-action-box { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; align-items: center; }
+        .btn-affiliate-primary {
+            width: 100%; max-width: 320px; background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #fff; font-weight: 700; border: none; padding: 12px; border-radius: 10px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 14px; text-decoration: none; box-shadow: 0 2px 8px rgba(22,163,74,0.3);
+        }
+        .btn-affiliate-secondary {
+            width: 100%; max-width: 320px; background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: #fff; font-weight: 700; border: none; padding: 11px; border-radius: 10px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 13px; text-decoration: none; box-shadow: 0 2px 8px rgba(124,58,237,0.3);
+        }
+
+        .ad-space-box {
+            margin-top: 15px; padding: 12px; background: #fdf2f8;
+            border: 1px dashed #f472b6; border-radius: 10px; text-align: center;
+        }
+
+        /* Auth & Profile Views */
+        .auth-container { padding: 30px 16px; max-width: 400px; margin: 0 auto; }
+        .auth-card {
+            background: #ffffff; border: 1px solid #cbd5e1;
+            padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .auth-card h3 { text-align: center; margin-bottom: 16px; font-size: 18px; color: var(--text-main); }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+        .form-group input {
+            width: 100%; padding: 10px 14px; background: #f9fafb;
+            border: 1px solid #cbd5e1; border-radius: 8px; color: var(--text-main); font-size: 12px; outline: none;
+        }
+        .auth-btn {
+            width: 100%; padding: 11px; background: #7c3aed;
+            border: none; border-radius: 8px; color: white; font-weight: 700; font-size: 13px; cursor: pointer;
+            box-shadow: 0 2px 6px rgba(124,58,237,0.3); margin-top: 4px;
+        }
+        .auth-switch { text-align: center; margin-top: 12px; font-size: 11px; color: var(--text-muted); }
+        .auth-switch span { color: var(--primary-glow); cursor: pointer; font-weight: 600; }
+
+        .auth-actions-bar { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; }
+        .circle-signup-btn {
+            width: 48px; height: 48px; border-radius: 50%; background: #16a34a;
+            border: none; color: white; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .square-recovery-btn {
+            width: 44px; height: 44px; border-radius: 10px; background: #fef08a;
+            border: 1px solid #facc15; color: #854d0e; font-size: 16px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* User Profile Dashboard */
+        .profile-box { padding: 20px 16px; text-align: center; }
+        .profile-avatar {
+            width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--primary-glow);
+            margin: 0 auto 12px; background-size: cover; background-position: center;
+        }
+        .profile-name { font-size: 17px; font-weight: 700; margin-bottom: 3px; }
+        .profile-badge {
+            display: inline-block; background: #fef9c3; border: 1px solid #fde047;
+            color: #854d0e; padding: 2px 10px; font-size: 10px; font-weight: 600; border-radius: 15px; margin-bottom: 15px;
+        }
+        .saved-creds-box {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px;
+            padding: 12px; text-align: left; margin-bottom: 12px; font-size: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .saved-creds-box h5 { color: var(--primary-glow); margin-bottom: 6px; font-size: 13px; }
+
+        /* Referral System Box */
+        .referral-box {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;
+            margin: 16px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .referral-box h4 { color: var(--primary-glow); font-size: 15px; margin-bottom: 8px; }
+        .ref-code-display {
+            font-size: 20px; font-weight: 800; background: #f3f4f6; padding: 8px 16px; border-radius: 8px;
+            display: inline-block; letter-spacing: 3px; color: #1f2937; margin: 8px 0; border: 1px dashed #cbd5e1;
+        }
+        .ref-link-input {
+            width: 100%; padding: 8px; background: #f9fafb; border: 1px solid #cbd5e1; border-radius: 6px;
+            font-size: 11px; text-align: center; color: var(--text-muted); margin-bottom: 10px; outline: none;
+        }
+
+        /* Category Full View Container */
+        .category-full-container { padding: 16px; }
+        .category-full-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+
+        /* Tools Hub View */
+        .tools-view-container { padding: 16px; }
+        .tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }
+        .tool-card {
+            background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px;
+            padding: 16px 10px; cursor: pointer; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.04); text-align: center;
+        }
+        .tool-card:hover { border-color: var(--primary-glow); }
+        .tool-card i { font-size: 24px; color: var(--primary-glow); margin-bottom: 8px; display: block; }
+        .tool-card h4 { font-size: 12px; font-weight: 600; }
+
+        /* Tool Modals / Panels */
+        .tool-panel {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff; z-index: 4600; display: none; flex-direction: column; padding: 16px;
+        }
+        .tool-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+        .tool-panel-content { flex: 1; overflow-y: auto; background: #f9fafb; border-radius: 10px; padding: 12px; border: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="appContainer">
+        
+        <!-- Toast Notification Popup -->
+        <div id="toast">সফলভাবে সম্পন্ন হয়েছে!</div>
+
+        <!-- Hamburger Drawer Menu -->
+        <div id="hamburgerDrawer">
+            <div class="drawer-header">
+                <span class="logo-title" style="font-size: 18px;" id="drawerMenuTitle" data-bn="জুয়াখোর মেনু" data-en="JuoKhor Menu">জুয়াখোর মেনু</span>
+                <button onclick="toggleHamburger()" style="background:none; border:none; color:var(--text-main); font-size:16px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="drawer-grid">
+                <div class="drawer-card" onclick="switchView('home'); toggleHamburger();">
+                    <i class="fa-solid fa-house"></i>
+                    <span data-bn="হোম" data-en="Home">হোম</span>
+                </div>
+                <div class="drawer-card" onclick="checkAuthAndNavigate(); toggleHamburger();">
+                    <i class="fa-solid fa-user"></i>
+                    <span data-bn="প্রোফাইল" data-en="Profile">প্রোফাইল</span>
+                </div>
+                <div class="drawer-card" onclick="switchView('tools-hub'); toggleHamburger();">
+                    <i class="fa-solid fa-toolbox"></i>
+                    <span data-bn="টুলস হাব" data-en="Tools Hub">টুলস হাব</span>
+                </div>
+                <div class="drawer-card" onclick="openCategoryView('latest'); toggleHamburger();">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span data-bn="শর্টকাট মেনু" data-en="Shortcut Menu">শর্টকাট মেনু</span>
+                </div>
+                <div class="drawer-card" onclick="openNotificationModal(); toggleHamburger();">
+                    <i class="fa-solid fa-bell"></i>
+                    <span data-bn="নোটিশ" data-en="Notice">নোটিশ</span>
+                </div>
+                <div class="drawer-card" onclick="toggleLanguage(); toggleHamburger();">
+                    <i class="fa-solid fa-language"></i>
+                    <span id="drawerLangText">English (EN)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header>
+            <button class="hamburger-btn" onclick="toggleHamburger()"><i class="fa-solid fa-bars"></i></button>
+            <div class="logo-area" onclick="switchView('home')">
+                <div class="logo-title" id="headerTitle">জুয়াখোর</div>
+                <div class="logo-subtitle" id="headerSlogan" data-bn="খেলুন - ইনজয় করুন" data-en="Play - Win - Enjoy">খেলুন - ইনজয় করুন</div>
+            </div>
+            <div class="header-right-actions">
+                <button class="lang-header-btn" onclick="toggleLanguage()" title="Change Language"><i class="fa-solid fa-globe"></i></button>
+                <button class="notification-btn" onclick="openNotificationModal()"><i class="fa-solid fa-bell"></i></button>
+            </div>
+        </header>
+
+        <!-- ================= HOME VIEW ================= -->
+        <div id="home-view" class="view-section active">
+            
+            <!-- Search Bar -->
+            <div class="search-box-wrapper">
+                <div class="search-container">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="liveSearchInput" placeholder="ক্যাসিনো সাইট বা গেম খুঁজুন..." oninput="handleLiveSearch(this.value)">
+                </div>
+            </div>
+
+            <!-- Hero Banner Container -->
+            <div class="banner-section">
+                <div class="hero-banner-container">
+                    <div class="hero-slider" id="heroSlider" ontouchstart="touchStart(event)" ontouchend="touchEnd(event)"></div>
+                </div>
+            </div>
+
+            <!-- 4 Square Shortcut Menus -->
+            <div class="shortcut-grid">
+                <div class="shortcut-card" onclick="openCategoryView('latest')">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span data-bn="সর্বশেষ আপডেট" data-en="Latest Update">সর্বশেষ আপডেট</span>
+                </div>
+                <div class="shortcut-card" onclick="openCategoryView('winning')">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span data-bn="উইনিং সাইট" data-en="Winning Sites">উইনিং সাইট</span>
+                </div>
+                <div class="shortcut-card" onclick="switchView('referral-view')">
+                    <i class="fa-solid fa-users"></i>
+                    <span data-bn="রেফার সিস্টেম" data-en="Refer System">রেফার সিস্টেম</span>
+                </div>
+                <div class="shortcut-card" onclick="openCategoryView('offers')">
+                    <i class="fa-solid fa-gift"></i>
+                    <span data-bn="অফার সাইট" data-en="Offer Sites">অফার সাইট</span>
+                </div>
+            </div>
+
+            <!-- Hub 1: সর্বশেষ আপডেট সাইট (1 post fitting screen, 5s auto scroll, total 4 posts) -->
+            <div class="section-header">
+                <div class="section-title" data-bn="সর্বশেষ আপডেট সাইট" data-en="Latest Updated Sites" id="hub1Title">সর্বশেষ আপডেট সাইট</div>
+                <button class="view-all-btn" onclick="openCategoryView('latest')" data-bn="সব দেখুন &rarr;" data-en="View All &rarr;">সব দেখুন &rarr;</button>
+            </div>
+            <div class="latest-hub-slider" id="latestHubContainer"></div>
+
+            <!-- Hub 2: বেস্ট উইনিং সাইট (2 posts fitting screen) -->
+            <div class="section-header">
+                <div class="section-title" data-bn="বেস্ট উইনিং সাইট" data-en="Best Winning Sites" id="hub2Title">বেস্ট উইনিং সাইট</div>
+                <button class="view-all-btn" onclick="openCategoryView('winning')" data-bn="সব দেখুন &rarr;" data-en="View All &rarr;">সব দেখুন &rarr;</button>
+            </div>
+            <div class="winning-hub-slider" id="bestWinningContainer"></div>
+
+            <!-- Hub 3: মোস্ট ভিজিটেড সাইট (3 posts fitting screen) -->
+            <div class="section-header">
+                <div class="section-title" data-bn="মোস্ট ভিজিটেড সাইট" data-en="Most Visited Sites" id="hub3Title">মোস্ট ভিজিটেড সাইট</div>
+                <button class="view-all-btn" onclick="openCategoryView('visited')" data-bn="সব দেখুন &rarr;" data-en="View All &rarr;">সব দেখুন &rarr;</button>
+            </div>
+            <div class="visited-hub-slider" id="mostVisitedContainer"></div>
+
+            <!-- Quick Action Pills -->
+            <div class="quick-actions">
+                <button class="action-pill" onclick="showToast('লাইভ চ্যাট কানেক্ট হচ্ছে...')"><i class="fa-solid fa-headset" style="color:var(--primary-glow);"></i> <span data-bn="লাইভ চ্যাট" data-en="Live Chat">লাইভ চ্যাট</span></button>
+                <button class="action-pill" onclick="window.open('https://telegram.org', '_blank')"><i class="fa-brands fa-telegram" style="color:#2563eb;"></i> <span data-bn="টেলিগ্রাম চ্যানেল" data-en="Telegram Channel">টেলিগ্রাম চ্যানেল</span></button>
+                <button class="action-pill" onclick="window.open('https://telegram.org', '_blank')"><i class="fa-brands fa-telegram" style="color:#0d9488;"></i> <span data-bn="টেলিগ্রাম সাপোর্ট" data-en="Telegram Support">টেলিগ্রাম সাপোর্ট</span></button>
+                <button class="action-pill" onclick="showToast('আপনার কল রিকোয়েস্ট সফলভাবে জমা হয়েছে!')"><i class="fa-solid fa-phone-volume" style="color:#db2777;"></i> <span data-bn="কল রিকুয়েষ্ট" data-en="Call Request">কল রিকুয়েষ্ট</span></button>
+            </div>
+
+            <footer>
+                &copy; 2026 জুয়াখোর - JuoKhor. All rights reserved.
+            </footer>
+        </div>
+
+        <!-- ================= TOOLS HUB VIEW (Replaces Games) ================= -->
+        <div id="tools-hub-view" class="view-section">
+            <div class="tools-view-container">
+                <h2 style="color:var(--primary-glow); margin-bottom:4px; font-size:16px;" data-bn="অ্যাডভান্সড টুলস হাব" data-en="Advanced Tools Hub">অ্যাডভান্সড টুলস হাব</h2>
+                <p style="font-size:11px; color:var(--text-muted); margin-bottom:15px;" data-bn="নিচের প্রয়োজনীয় ইউটিলিটি টুলসগুলো ব্যবহার করুন।" data-en="Use the essential utility tools below.">নিচের প্রয়োজনীয় ইউটিলিটি টুলসগুলো ব্যবহার করুন।</p>
+                
+                <div class="tools-grid">
+                    <div class="tool-card" onclick="openTool('browser')">
+                        <i class="fa-solid fa-compass" style="color:#f97316;"></i>
+                        <h4 data-bn="ব্রাউজার" data-en="Browser">ব্রাউজার</h4>
+                    </div>
+                    <div class="tool-card" onclick="openTool('refresh')">
+                        <i class="fa-solid fa-rotate" style="color:#10b981;"></i>
+                        <h4 data-bn="রিফ্রেশ" data-en="Refresh">রিফ্রেশ</h4>
+                    </div>
+                    <div class="tool-card" onclick="openTool('booster')">
+                        <i class="fa-solid fa-gauge-high" style="color:#6366f1;"></i>
+                        <h4 data-bn="নেটওয়ার্ক বুস্টার" data-en="Network Booster">নেটওয়ার্ক বুস্টার</h4>
+                    </div>
+                    <div class="tool-card" onclick="openTool('ipchecker')">
+                        <i class="fa-solid fa-network-wired" style="color:#06b6d4;"></i>
+                        <h4 data-bn="আইপি চেকার" data-en="IP Checker">আইপি চেকার</h4>
+                    </div>
+                    <div class="tool-card" onclick="openTool('notepad')">
+                        <i class="fa-solid fa-note-sticky" style="color:#eab308;"></i>
+                        <h4 data-bn="নোটপ্যাড" data-en="Notepad">নোটপ্যাড</h4>
+                    </div>
+                    <div class="tool-card" onclick="openTool('typo')">
+                        <i class="fa-solid fa-keyboard" style="color:#ec4899;"></i>
+                        <h4 data-bn="টাইপো লগ" data-en="Typo Log">টাইপো লগ</h4>
+                    </div>
+                </div>
+            </div>
+            <footer>&copy; 2026 জুয়াখোর - JuoKhor</footer>
+        </div>
+
+        <!-- ================= CATEGORY FULL VIEW ================= -->
+        <div id="category-full-view" class="view-section">
+            <div class="category-full-container">
+                <button class="back-btn" onclick="switchView('home')"><i class="fa-solid fa-arrow-left"></i> <span data-bn="হোমে ফিরে যান" data-en="Back to Home">হোমে ফিরে যান</span></button>
+                <h2 id="categoryFullTitle" style="font-size:16px; color:var(--primary-glow); margin-bottom:10px;">ক্যাটেগরি তালিকা</h2>
+                <div class="category-full-grid" id="categoryFullGrid"></div>
+            </div>
+            <footer>&copy; 2026 জুয়াখোর - JuoKhor</footer>
+        </div>
+
+        <!-- ================= REFERRAL SYSTEM VIEW ================= -->
+        <div id="referral-view" class="view-section">
+            <div class="post-detail-container">
+                <button class="back-btn" onclick="switchView('home')"><i class="fa-solid fa-arrow-left"></i> <span data-bn="হোমে ফিরে যান" data-en="Back to Home">হোমে ফিরে যান</span></button>
+                
+                <div class="referral-box">
+                    <h4 data-bn="আপনার রেফারেল প্রোগ্রাম" data-en="Your Referral Program">আপনার রেফারেল প্রোগ্রাম</h4>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;" data-bn="বন্ধুদের সাথে শেয়ার করে আকর্ষণীয় কমিশন জিতুন।" data-en="Share with friends and earn exclusive commissions.">বন্ধুদের সাথে শেয়ার করে আকর্ষণীয় কমিশন জিতুন।</p>
+                    
+                    <div style="font-size: 11px; font-weight: 600; color: var(--text-muted);" data-bn="আপনার ৪ সংখ্যার রেফার কোড:" data-en="Your 4-Digit Referral Code:">আপনার ৪ সংখ্যার রেফার কোড:</div>
+                    <div class="ref-code-display" id="userReferralCode">7492</div>
+                    
+                    <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 10px;" data-bn="আপনার রেফারেল লিংক:" data-en="Your Referral Link:">আপনার রেফারেল লিংক:</div>
+                    <input type="text" class="ref-link-input" id="userReferralLink" value="https://juokhor.com/ref/7492" readonly>
+                    
+                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <button class="auth-btn" onclick="copyReferralLink()" style="flex:1; background:#16a34a;"><i class="fa-solid fa-copy"></i> <span data-bn="লিংক কপি করুন" data-en="Copy Link">লিংক কপি করুন</span></button>
+                        <button class="auth-btn" onclick="shareReferralLink()" style="flex:1; background:#7c3aed;"><i class="fa-solid fa-share-nodes"></i> <span data-bn="শেয়ার করুন" data-en="Share">শেয়ার করুন</span></button>
+                    </div>
+                </div>
+            </div>
+            <footer>&copy; 2026 জুয়াখোর - JuoKhor</footer>
+        </div>
+
+        <!-- ================= POST DETAILS VIEW ================= -->
+        <div id="post-detail-view" class="view-section">
+            <div class="post-detail-container">
+                <button class="back-btn" onclick="switchView('home')"><i class="fa-solid fa-arrow-left"></i> <span data-bn="হোমে ফিরে যান" data-en="Back to Home">হোমে ফিরে যান</span></button>
+                
+                <div class="gallery-box-center">
+                    <div class="gallery-slider" id="detailGallery"></div>
+                </div>
+
+                <div class="affiliate-action-box" style="margin-top: 0; margin-bottom: 15px;">
+                    <a id="detailAffiliateBtn" href="#" target="_blank" class="btn-affiliate-primary">
+                        <i class="fa-solid fa-user-plus"></i> <span data-bn="রেফারেল লিংকে জয়েন করুন (Join Now)" data-en="Join via Referral Link">রেফারেল লিংকে জয়েন করুন (Join Now)</span>
+                    </a>
+                    <a id="detailAltBtn" href="#" target="_blank" class="btn-affiliate-secondary">
+                        <i class="fa-solid fa-external-link-alt"></i> <span data-bn="বিকল্প অফিশিয়াল লিংক ভিজিট করুন" data-en="Visit Alternative Link">বিকল্প অফিশিয়াল লিংক ভিজিট করুন</span>
+                    </a>
+                </div>
+
+                <div class="lucrative-offer-box">
+                    <h4 data-bn="🔥 এক্সক্লুসিভ ডিপোজিট বোনাস অফার!" data-en="🔥 Exclusive Deposit Bonus Offer!">🔥 এক্সক্লুসিভ ডিপোজিট বোনাস অফার!</h4>
+                    <p data-bn="আজই ১,০০০ টাকা ডিপোজিট করলে ইনস্ট্যান্ট ৫০০ টাকা ক্যাশ বোনাস এবং ফ্রি স্পিন পান! বিভিন্ন লোভনীয় অফার উপভোগ করতে এখনি জয়েন করুন।" data-en="Deposit 1,000 BDT today and get an instant 500 BDT cash bonus + free spins! Enjoy various lucrative offers right now.">আজই ১,০০০ টাকা ডিপোজিট করলে ইনস্ট্যান্ট ৫০০ টাকা ক্যাশ বোনাস এবং ফ্রি স্পিন পান! বিভিন্ন লোভনীয় অফার উপভোগ করতে এখনি জয়েন করুন।</p>
+                </div>
+
+                <h2 class="detail-title" id="detailTitle"></h2>
+                <div class="detail-meta-row">
+                    <span id="detailViews"><i class="fa-solid fa-eye" style="color:var(--primary-glow)"></i> 0 Views</span>
+                    <span id="detailRating"><i class="fa-solid fa-star" style="color:#ca8a04"></i> 4.9 Rating</span>
+                    <span id="detailDate"><i class="fa-solid fa-calendar" style="color:#db2777"></i> ১২ নভেম্বর ২০২৬</span>
+                </div>
+
+                <div class="detail-content">
+                    <p id="detailDesc"></p>
+                </div>
+
+                <div class="ad-space-box">
+                    <span style="font-size:9px; background:#db2777; color:#fff; padding:2px 6px; border-radius:4px; font-weight:700; text-transform:uppercase;">Sponsored Ad Space</span>
+                    <h5 style="color:#7c3aed; margin-top:4px; font-size:12px;">Exclusive Casino Partner Banner</h5>
+                    <p style="font-size:10px; color:var(--text-muted);">Monetag / Adsgram high yield advertisement space ready for integration.</p>
+                </div>
+            </div>
+            <footer>&copy; 2026 জুয়াখোর - JuoKhor</footer>
+        </div>
+
+        <!-- ================= LOGIN / AUTH VIEW ================= -->
+        <div id="auth-view" class="view-section">
+            <div class="auth-container">
+                <div class="auth-card" id="loginCard">
+                    <h3 data-bn="সদস্য লগিন (Member Login)" data-en="Member Login">সদস্য লগিন (Member Login)</h3>
+                    <div class="form-group">
+                        <label data-bn="ইউজারনেম / মোবাইল / ইমেইল" data-en="Username / Mobile / Email">ইউজারনেম / মোবাইল / ইমেইল</label>
+                        <input type="text" id="loginUser" placeholder="Enter username/email/mobile">
+                    </div>
+                    <div class="form-group">
+                        <label data-bn="পাসওয়ার্ড" data-en="Password">পাসওয়ার্ড</label>
+                        <input type="password" id="loginPass" placeholder="Enter password">
+                    </div>
+                    <button class="auth-btn" onclick="handleLogin()" data-bn="লগিন করুন" data-en="Login">লগিন করুন</button>
+                    
+                    <div class="auth-actions-bar">
+                        <button class="circle-signup-btn" onclick="toggleAuthMode('signup')" title="Create Account"><i class="fa-solid fa-plus"></i></button>
+                        <button class="square-recovery-btn" onclick="toggleAuthMode('recovery')" title="Password Recovery"><i class="fa-solid fa-key"></i></button>
+                    </div>
+                </div>
+
+                <div class="auth-card" id="signupCard" style="display: none;">
+                    <h3 data-bn="নতুন একাউন্ট তৈরি করুন (Sign Up)" data-en="Create Account">নতুন একাউন্ট তৈরি করুন (Sign Up)</h3>
+                    <div class="form-group">
+                        <label data-bn="ইউজারনেম" data-en="Username">ইউজারনেম</label>
+                        <input type="text" id="regUser" placeholder="Choose username">
+                    </div>
+                    <div class="form-group">
+                        <label data-bn="পূর্ণ নাম" data-en="Full Name">পূর্ণ নাম</label>
+                        <input type="text" id="regName" placeholder="Your full name">
+                    </div>
+                    <div class="form-group">
+                        <label data-bn="মোবাইল নাম্বার" data-en="Mobile Number">মোবাইল নাম্বার</label>
+                        <input type="text" id="regMobile" placeholder="Mobile number">
+                    </div>
+                    <div class="form-group">
+                        <label data-bn="পাসওয়ার্ড" data-en="Password">পাসওয়ার্ড</label>
+                        <input type="password" id="regPass" placeholder="Create password">
+                    </div>
+                    <button class="auth-btn" onclick="handleSignup()" data-bn="সাইন আপ করুন" data-en="Register">সাইন আপ করুন</button>
+                    <div class="auth-switch">
+                        <span onclick="toggleAuthMode('login')" data-bn="লগিন পেজে ফিরে যান" data-en="Back to Login">লগিন পেজে ফিরে যান</span>
+                    </div>
+                </div>
+
+                <div class="auth-card" id="recoveryCard" style="display: none;">
+                    <h3 data-bn="পাসওয়ার্ড রিকভারি" data-en="Password Recovery">পাসওয়ার্ড রিকভারি</h3>
+                    <div class="form-group">
+                        <label data-bn="রেজিস্টার্ড ইউজারনেম বা মোবাইল" data-en="Registered Username or Mobile">রেজিস্টার্ড ইউজারনেম বা মোবাইল</label>
+                        <input type="text" id="recInput" placeholder="Enter username/mobile">
+                    </div>
+                    <button class="auth-btn" onclick="handleRecovery()" data-bn="রিকভারি কোড পাঠান" data-en="Send Recovery Code">রিকভারি কোড পাঠান</button>
+                    <div class="auth-switch">
+                        <span onclick="toggleAuthMode('login')" data-bn="লগিন করুন" data-en="Back to Login">লগিন করুন</span>
+                    </div>
+                </div>
+            </div>
+            <footer>&copy; 2026 জুয়াখোর - JuoKhor</footer>
+        </div>
+
+        <!-- ================= USER PROFILE VIEW ================= -->
+        <div id="profile-view" class="view-section">
+            <div class="profile-box">
+                <div class="profile-avatar" style="background-image: url('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80')"></div>
+                <div class="profile-name" id="profileDisplayName">Kollol Tanwir</div>
+                <div class="profile-badge"><i class="fa-solid fa-crown"></i> <span data-bn="ভেরিফাইড এফিলিয়েট মেম্বার" data-en="Verified Affiliate Member">ভেরিফাইড এফিলিয়েট মেম্বার</span></div>
+
+                <div class="saved-creds-box">
+                    <h5><i class="fa-solid fa-key" style="color:#ca8a04"></i> Saved Credentials & Device Sync</h5>
+                    <p style="color:var(--text-muted); font-size:11px; margin-bottom:4px;">Username: <span id="savedUserDisp" style="color:var(--primary-glow);">kollol_admin</span></p>
+                    <p style="color:var(--text-muted); font-size:11px; margin-bottom:4px;">Mobile: <span id="savedMobDisp" style="color:var(--primary-glow);">+8801700000000</span></p>
+                    <p style="color:var(--text-muted); font-size:11px;">Status: <span style="color:#16a34a;">Encrypted & Stored in LocalStorage</span></p>
+                </div>
+
+                <button class="auth-btn" onclick="handleLogout()" style="background:#dc2626;">
+                    <i class="fa-solid fa-right-from-bracket"></i> <span data-bn="লগআউট করুন" data-en="Logout">লগআউট করুন</span>
+                </button>
+            </div>
+            <footer>&copy; 2026 জুয়াখোর - JuoKhor</footer>
+        </div>
+
+        <!-- Bottom Navigation Bar (Tools replaces Games) -->
+        <nav class="bottom-nav">
+            <a class="nav-item active" onclick="switchView('home'); setActiveNav(this)">
+                <i class="fa-solid fa-house"></i>
+                <span data-bn="হোম" data-en="Home">হোম</span>
+            </a>
+            <a class="nav-item" onclick="checkAuthAndNavigate(); setActiveNav(this)">
+                <i class="fa-solid fa-user"></i>
+                <span data-bn="প্রোফাইল" data-en="Profile">প্রোফাইল</span>
+            </a>
+            <a class="nav-item" onclick="switchView('tools-hub'); setActiveNav(this)">
+                <i class="fa-solid fa-toolbox" style="color:#db2777;"></i>
+                <span data-bn="টুলস" data-en="Tools">টুলস</span>
+            </a>
+        </nav>
+
+    </div>
+
+    <!-- Tool Panels Modal (Opera Browser, Refresh, Booster, IP Checker, Notepad, Typo) -->
+    <div id="toolPanel" class="tool-panel">
+        <div class="tool-panel-header">
+            <h3 id="toolPanelTitle" style="color:var(--primary-glow); font-size:15px;">Tool Panel</h3>
+            <button onclick="closeToolPanel()" style="background:#fee2e2; border:1px solid #f87171; color:#b91c1c; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:11px; font-weight:600;"><i class="fa-solid fa-xmark"></i> বন্ধ করুন</button>
+        </div>
+        <div class="tool-panel-content" id="toolPanelContent"></div>
+    </div>
+
+    <!-- Notification / Notice Modal Popup -->
+    <div id="notifModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:none; justify-content:center; align-items:center; z-index:4800; padding:16px;">
+        <div style="background:#ffffff; border:1px solid #cbd5e1; width:100%; max-width:360px; padding:18px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h4 style="color:var(--text-main); font-size:14px;"><i class="fa-solid fa-bell"></i> নোটিশ ও নোটিফিকেশন</h4>
+                <button onclick="closeNotificationModal()" style="background:none; border:none; color:var(--text-main); font-size:16px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div style="background:#f9fafb; padding:10px; border-radius:8px; border:1px solid #e5e7eb; cursor:pointer; margin-bottom:8px;" onclick="showToast('Opened notice: VIP Bonus Credited!')">
+                <p style="font-size:12px; font-weight:600; color:var(--text-main);">🎉 নতুন ক্যাসিনো এফিলিয়েট বোনাস আপডেট!</p>
+                <p style="font-size:10px; color:var(--text-muted); margin-top:3px;">আপনার লিংকে নতুন রেজিস্ট্রেশনের জন্য ১০০% বোনাস যোগ হয়েছে। বিস্তারিত দেখতে ক্লিক করুন।</p>
+            </div>
+            <div style="background:#f9fafb; padding:10px; border-radius:8px; border:1px solid #e5e7eb; cursor:pointer;" onclick="showToast('Opened notice: Special Event!')">
+                <p style="font-size:12px; font-weight:600; color:var(--text-main);">⚡ স্পেশাল টুর্নামেন্ট নোটিশ</p>
+                <p style="font-size:10px; color:var(--text-muted); margin-top:3px;">আজ রাত ১০টায় লাইভ পোকার টুর্নামেন্ট শুরু হবে।</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Casino Database with fully Bengali titles
+        const casinoPosts = [
+            {
+                id: 1,
+                title: "ঢাকা মেগাওইন ক্যাসিনো ভিআইপি বোনাস",
+                views: "245K",
+                rating: "4.9",
+                date: "১২ নভেম্বর ২০২৬",
+                category: "winning",
+                isOffer: true,
+                image: "https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&w=800&q=80",
+                gallery: [
+                    "https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=800&q=80"
+                ],
+                description: "বাংলাদেশের খেলোয়াড়দের জন্য সেরা লাইভ ক্যাসিনো ও ইনস্ট্যান্ট বিকাশ/নগদ উইথড্রল সুবিধা। আমাদের এফিলিয়েট লিংকের মাধ্যমে একাউন্ট খুললে পাবেন বিশেষ ভিআইপি ওয়েলকাম বোনাস।",
+                affiliateLink: "https://example.com/ref/juokhor-megawin-2026",
+                altLink: "https://example.com/alt/megawin-official"
+            },
+            {
+                id: 2,
+                title: "বেঙ্গল রয়্যাল স্পিনস ও স্লট গেমস",
+                views: "180K",
+                rating: "4.8",
+                date: "১১ নভেম্বর ২০২৬",
+                category: "winning",
+                isOffer: true,
+                image: "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&w=800&q=80",
+                gallery: [
+                    "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=800&q=80"
+                ],
+                description: "শত শত স্লট গেম ও আকর্ষণীয় প্রোগ্রেসিভ জ্যাকপট অফার। নতুন ব্যবহারকারীদের জন্য প্রথম ডিপোজিটে ১০০% ম্যাচিং ক্যাশব্যাক বোনাস নিশ্চিত।",
+                affiliateLink: "https://example.com/ref/juokhor-royalspins",
+                altLink: "https://example.com/alt/royalspins-portal"
+            },
+            {
+                id: 3,
+                title: "সিলেট গোল্ডেন এস পোকার টেবিল",
+                views: "195K",
+                rating: "4.9",
+                date: "১০ নভেম্বর ২০২৬",
+                category: "winning",
+                isOffer: false,
+                image: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=800&q=80",
+                gallery: [
+                    "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
+                ],
+                description: "রিয়েল-টাইম মাল্টিপ্লেয়ার পোকার এবং ইউরোপিয়ান রুলেট টেবিল। প্রতিদিন টুর্নামেন্টে অংশ নিয়ে জিতে নিন লাখ টাকা ক্যাশ প্রাইজ।",
+                affiliateLink: "https://example.com/ref/juokhor-goldenace",
+                altLink: "https://example.com/alt/goldenace-game"
+            },
+            {
+                id: 4,
+                title: "চট্টগ্রাম সাইবার ভেগাস স্পিন ও উইন",
+                views: "135K",
+                rating: "4.7",
+                date: "০৯ নভেম্বর ২০২৬",
+                category: "winning",
+                isOffer: true,
+                image: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80",
+                gallery: [
+                    "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80"
+                ],
+                description: "আধুনিক সাইবার ভেগাস প্ল্যাটফর্ম। দ্রুততম ট্রানজেকশন সাপোর্টসহ এখনই রেফারেল লিংকে জয়েন করুন।",
+                affiliateLink: "https://example.com/ref/juokhor-cybervegas",
+                altLink: "https://example.com/alt/cybervegas-secure"
+            },
+            {
+                id: 5,
+                title: "কক্সবাজার লাকি স্টার ক্র্যাশ গেম",
+                views: "160K",
+                rating: "4.8",
+                date: "০৮ নভেম্বর ২০২৬",
+                category: "winning",
+                isOffer: false,
+                image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
+                gallery: [
+                    "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80"
+                ],
+                description: "হাই মাল্টিপ্লায়ার ক্র্যাশ গেম এবং ইনস্ট্যান্ট প্রফিট তোলার দারুণ সুযোগ। আমাদের এফিলিয়েট লিংকের মাধ্যমে একাউন্ট খুললেই স্পেশাল বোনাস।",
+                affiliateLink: "https://example.com/ref/juokhor-luckystar",
+                altLink: "https://example.com/alt/luckystar-official"
+            },
+            {
+                id: 6,
+                title: "বাংলাদেশ ডায়মন্ড বেট ক্যাসিনো",
+                views: "210K",
+                rating: "4.9",
+                date: "০৭ নভেম্বর ২০২৬",
+                category: "latest",
+                isOffer: true,
+                image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+                gallery: [
+                    "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80"
+                ],
+                description: "ডায়মন্ড টায়ার ভিআইপি ক্লাব এবং সাপ্তাহিক ক্যাশব্যাক অফার। বিশ্বস্ত প্ল্যাটফর্মে আজই আপনার গেমিং যাত্রা শুরু করুন।",
+                affiliateLink: "https://example.com/ref/juokhor-diamondbet",
+                altLink: "https://example.com/alt/diamondbet-secure"
+            },
+            {
+                id: 7,
+                title: "রাজশাহী নিয়ন জ্যাকপট এডিশন",
+                views: "115K",
+                rating: "4.6",
+                date: "০৬ নভেম্বর ২০২৬",
+                category: "latest",
+                isOffer: false,
+                image: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80",
+                gallery: [
+                    "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80"
+                ],
+                description: "নিয়ন থিমযুক্ত এক্সক্লুসিভ স্লট মেশিন এবং মেগা প্রোগ্রেসিভ জ্যাকপট।",
+                affiliateLink: "https://example.com/ref/juokhor-neonjackpots",
+                altLink: "https://example.com/alt/neonjackpots"
+            }
+        ];
+
+        let currentLanguage = 'bn';
+        let isLoggedIn = true;
+        let globalTypoLogs = [];
+        let currentAssignedIP = "103.112.42.12";
+        let previousIPsHistory = ["192.168.1.15", "103.112.42.12"]; // Duplicate for testing red mark
+
+        window.onload = function() {
+            renderHeroSlider();
+            renderLatestHub();
+            renderBestWinning();
+            renderMostVisited();
+            trackTypoInputs();
+        };
+
+        // Hero Banners Auto Slide (every 4 seconds)
+        const heroBanners = [
+            { tag: "ভিআইপি অফার", title: "ঢাকা মেগাওইন ক্যাসিনো ভিআইপি বোনাস", img: "https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&w=800&q=80", id: 1 },
+            { tag: "ফ্রি স্পিন", title: "বেঙ্গল রয়্যাল স্পিনস ও স্লট গেমস", img: "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&w=800&q=80", id: 2 },
+            { tag: "লাইভ পোকার", title: "সিলেট গোল্ডেন এস পোকার টেবিল", img: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=800&q=80", id: 3 },
+            { tag: "ক্রিপ্টো ক্যাসিনো", title: "চট্টগ্রাম সাইবার ভেগাস স্পিন ও উইন", img: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80", id: 4 }
+        ];
+
+        let currentSlideIdx = 0;
+        function renderHeroSlider() {
+            const slider = document.getElementById('heroSlider');
+            slider.innerHTML = '';
+            heroBanners.forEach((b, idx) => {
+                const div = document.createElement('div');
+                div.className = `slide ${idx === 0 ? 'active' : ''}`;
+                div.style.backgroundImage = `url('${b.img}')`;
+                div.onclick = () => openPostDetails(b.id);
+                div.innerHTML = `
+                    <div class="slide-content">
+                        <span class="slide-tag">${b.tag}</span>
+                        <div class="slide-title">${b.title}</div>
+                    </div>
+                `;
+                slider.appendChild(div);
+            });
+        }
+
+        setInterval(() => {
+            const slider = document.getElementById('heroSlider');
+            if(!slider) return;
+            currentSlideIdx = (currentSlideIdx + 1) % heroBanners.length;
+            slider.scrollTo({ left: currentSlideIdx * slider.clientWidth, behavior: 'smooth' });
+        }, 4000);
+
+        let touchStartX = 0;
+        function touchStart(e) { touchStartX = e.touches[0].clientX; }
+        function touchEnd(e) {
+            let touchEndX = e.changedTouches[0].clientX;
+            const slider = document.getElementById('heroSlider');
+            if(touchStartX - touchEndX > 50) {
+                currentSlideIdx = Math.min(currentSlideIdx + 1, heroBanners.length - 1);
+                slider.scrollTo({ left: currentSlideIdx * slider.clientWidth, behavior: 'smooth' });
+            } else if(touchEndX - touchStartX > 50) {
+                currentSlideIdx = Math.max(currentSlideIdx - 1, 0);
+                slider.scrollTo({ left: currentSlideIdx * slider.clientWidth, behavior: 'smooth' });
+            }
+        }
+
+        // Hub 1: Latest Updated Sites (1 post fitting screen, 5s auto scroll, total 4 posts)
+        function renderLatestHub() {
+            const container = document.getElementById('latestHubContainer');
+            container.innerHTML = '';
+            const latestData = casinoPosts.slice(0, 4);
+
+            latestData.forEach(post => {
+                const card = document.createElement('div');
+                card.className = 'latest-card-item';
+                card.onclick = () => openPostDetails(post.id);
+                card.innerHTML = `
+                    <div class="latest-thumb" style="background-image: url('${post.image}')"></div>
+                    <div class="latest-info">
+                        <h4>${post.title}</h4>
+                        <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:4px;">
+                            <span style="color:#ca8a04;"><i class="fa-solid fa-star"></i> ${post.rating}</span>
+                            <span style="color:var(--primary-glow);"><i class="fa-solid fa-eye"></i> ${post.views}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Auto scroll Hub 1 horizontally every 5 seconds
+        setInterval(() => {
+            const hub = document.getElementById('latestHubContainer');
+            if(!hub) return;
+            if(hub.scrollLeft + hub.clientWidth >= hub.scrollWidth - 10) {
+                hub.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+                hub.scrollBy({ left: hub.clientWidth, behavior: 'smooth' });
+            }
+        }, 5000);
+
+        // Hub 2: Best Winning Sites (2 posts fitting screen)
+        function renderBestWinning() {
+            const container = document.getElementById('bestWinningContainer');
+            container.innerHTML = '';
+            const bestData = [...casinoPosts].sort((a,b) => parseFloat(b.rating) - parseFloat(a.rating)).slice(0, 5);
+            
+            bestData.forEach(post => {
+                const card = document.createElement('div');
+                card.className = 'win-card-item';
+                card.onclick = () => openPostDetails(post.id);
+                card.innerHTML = `
+                    <div class="win-thumb" style="background-image: url('${post.image}')"></div>
+                    <div class="win-info">
+                        <h4>${post.title}</h4>
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:2px;">
+                            <span style="color:#ca8a04;"><i class="fa-solid fa-star"></i> ${post.rating} Win</span>
+                            <a href="${post.affiliateLink}" target="_blank" style="color:#16a34a; text-decoration:none;" onclick="event.stopPropagation()">Join &rarr;</a>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Hub 3: Most Visited Sites (3 posts fitting screen)
+        function renderMostVisited() {
+            const container = document.getElementById('mostVisitedContainer');
+            container.innerHTML = '';
+            const visitedData = [...casinoPosts].slice(0, 6);
+
+            visitedData.forEach(post => {
+                const card = document.createElement('div');
+                card.className = 'visit-card-item';
+                card.onclick = () => openPostDetails(post.id);
+                card.innerHTML = `
+                    <div class="visit-thumb" style="background-image: url('${post.image}')"></div>
+                    <div class="visit-info">
+                        <h4>${post.title}</h4>
+                        <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-muted); margin-top:2px;">
+                            <span style="color:var(--primary-glow);"><i class="fa-solid fa-eye"></i> ${post.views}</span>
+                            <a href="${post.affiliateLink}" target="_blank" style="color:#16a34a; text-decoration:none;" onclick="event.stopPropagation()">Play &rarr;</a>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Category View All Page
+        function openCategoryView(type) {
+            const titleEl = document.getElementById('categoryFullTitle');
+            const gridEl = document.getElementById('categoryFullGrid');
+            gridEl.innerHTML = '';
+
+            let dataList = casinoPosts;
+            let titleText = currentLanguage === 'bn' ? 'সকল পোস্টের তালিকা' : 'All Posts List';
+
+            if(type === 'latest') {
+                dataList = casinoPosts.slice(0, 4);
+                titleText = currentLanguage === 'bn' ? 'সর্বশেষ আপডেট সাইটসমূহ' : 'Latest Updated Sites';
+            } else if(type === 'winning') {
+                dataList = casinoPosts.filter(p => p.category === 'winning');
+                titleText = currentLanguage === 'bn' ? 'বেস্ট উইনিং সাইটসমূহ' : 'Best Winning Sites';
+            } else if(type === 'offers') {
+                dataList = casinoPosts.filter(p => p.isOffer);
+                titleText = currentLanguage === 'bn' ? 'এক্সক্লুসিভ অফার সাইটসমূহ' : 'Exclusive Offer Sites';
+            } else if(type === 'visited') {
+                dataList = casinoPosts;
+                titleText = currentLanguage === 'bn' ? 'মোস্ট ভিজিটেড সাইটসমূহ' : 'Most Visited Sites';
+            }
+
+            titleEl.innerText = titleText;
+
+            dataList.forEach(post => {
+                const div = document.createElement('div');
+                div.className = 'latest-card-item';
+                div.style.minWidth = '100%';
+                div.onclick = () => openPostDetails(post.id);
+                div.innerHTML = `
+                    <div class="latest-thumb" style="background-image: url('${post.image}')"></div>
+                    <div class="latest-info">
+                        <h4>${post.title}</h4>
+                        <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:4px;">
+                            <span style="color:#ca8a04;"><i class="fa-solid fa-star"></i> ${post.rating}</span>
+                            <span style="color:var(--primary-glow);"><i class="fa-solid fa-eye"></i> ${post.views}</span>
+                        </div>
+                    </div>
+                `;
+                gridEl.appendChild(div);
+            });
+
+            switchView('category-full-view');
+        }
+
+        // Post Details Page Renderer
+        function openPostDetails(postId) {
+            const post = casinoPosts.find(p => p.id === postId);
+            if(!post) return;
+
+            const gallery = document.getElementById('detailGallery');
+            gallery.innerHTML = '';
+            post.gallery.forEach(imgUrl => {
+                const div = document.createElement('div');
+                div.className = 'gallery-img';
+                div.style.backgroundImage = `url('${imgUrl}')`;
+                gallery.appendChild(div);
+            });
+
+            document.getElementById('detailTitle').innerText = post.title;
+            document.getElementById('detailViews').innerHTML = `<i class="fa-solid fa-eye" style="color:var(--primary-glow)"></i> ${post.views} Views`;
+            document.getElementById('detailDesc').innerText = post.description;
+
+            document.getElementById('detailAffiliateBtn').href = post.affiliateLink;
+            document.getElementById('detailAltBtn').href = post.altLink;
+
+            switchView('post-detail-view');
+        }
+
+        // Language Toggle System (BN <=> EN) with full search placeholder & text mapping
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'bn' ? 'en' : 'bn';
+            const htmlRoot = document.getElementById('htmlRoot');
+            htmlRoot.setAttribute('lang', currentLanguage);
+
+            document.getElementById('drawerLangText').innerText = currentLanguage === 'bn' ? 'English (EN)' : 'বাংলা (BN)';
+            
+            const searchInput = document.getElementById('liveSearchInput');
+            if(currentLanguage === 'bn') {
+                document.getElementById('headerTitle').innerText = 'জুয়াখোর';
+                document.getElementById('headerSlogan').innerText = 'খেলুন - ইনজয় করুন';
+                document.getElementById('drawerMenuTitle').innerText = 'জুয়াখোর মেনু';
+                document.getElementById('hub1Title').innerText = 'সর্বশেষ আপডেট সাইট';
+                document.getElementById('hub2Title').innerText = 'বেস্ট উইনিং সাইট';
+                document.getElementById('hub3Title').innerText = 'মোস্ট ভিজিটেড সাইট';
+                searchInput.placeholder = 'ক্যাসিনো সাইট বা গেম খুঁজুন...';
+            } else {
+                document.getElementById('headerTitle').innerText = 'JuoKhor';
+                document.getElementById('headerSlogan').innerText = 'Play - Win - Enjoy';
+                document.getElementById('drawerMenuTitle').innerText = 'JuoKhor Menu';
+                document.getElementById('hub1Title').innerText = 'Latest Updated Sites';
+                document.getElementById('hub2Title').innerText = 'Best Winning Sites';
+                document.getElementById('hub3Title').innerText = 'Most Visited Sites';
+                searchInput.placeholder = 'Search casino site or game...';
+            }
+
+            document.querySelectorAll('[data-bn]').forEach(el => {
+                const val = el.getAttribute(`data-${currentLanguage}`);
+                if(val) el.innerText = val;
+            });
+
+            showToast(currentLanguage === 'bn' ? 'ভাষা বাংলায় পরিবর্তিত হয়েছে' : 'Language switched to English');
+        }
+
+        // Advanced Tools Hub Handlers (Browser, Refresh, Booster, IP Checker, Notepad, Typo)
+        function openTool(toolName) {
+            const panel = document.getElementById('toolPanel');
+            const titleEl = document.getElementById('toolPanelTitle');
+            const contentEl = document.getElementById('toolPanelContent');
+            panel.style.display = 'flex';
+            contentEl.innerHTML = '';
+
+            if(toolName === 'browser') {
+                titleEl.innerText = 'অপারেটর সিকিউর ব্রাউজার (Opera Style)';
+                contentEl.innerHTML = `
+                    <div style="display:flex; gap:6px; margin-bottom:10px;">
+                        <input type="text" id="browserUrl" value="https://www.google.com" style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px;" />
+                        <button onclick="loadBrowserUrl()" style="padding:8px 14px; background:#f97316; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;"><i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                    <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; height:320px; display:flex; align-items:center; justify-content:center; text-align:center; padding:15px;" id="browserScreen">
+                        <p style="color:#4b5563; font-size:12px;"><i class="fa-solid fa-shield-halved" style="color:#f97316; font-size:24px; display:block; margin-bottom:8px;"></i>অপারেটর ফাস্ট অ্যান্ড সিকিউর ব্রাউজার মোড একটিভ। ইউআরএল লিখে এন্টার দিন।</p>
+                    </div>
+                `;
+            } else if(toolName === 'refresh') {
+                titleEl.innerText = 'অ্যাপ ডাটা রিফ্রেশ';
+                contentEl.innerHTML = `
+                    <div style="text-align:center; padding:30px 10px;">
+                        <i class="fa-solid fa-rotate" style="font-size:36px; color:#10b981; animation: spin 1s linear infinite; margin-bottom:15px; display:block;"></i>
+                        <h4 style="margin-bottom:8px; font-size:14px;">অ্যাপ ডাটা ও ক্যাশ আপডেট করা হচ্ছে...</h4>
+                        <p style="font-size:11px; color:#4b5563;">সকল নতুন ফিচার এবং অফার সিঙ্ক সম্পন্ন হয়েছে।</p>
+                        <button onclick="closeToolPanel(); showToast('অ্যাপ সফলভাবে রিফ্রেশ হয়েছে!');" style="margin-top:20px; padding:10px 20px; background:#10b981; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">রিফ্রেশ সম্পন্ন করুন</button>
+                    </div>
+                `;
+            } else if(toolName === 'booster') {
+                titleEl.innerText = 'নেটওয়ার্ক বুস্টার ও অপ্টিমাইজার';
+                contentEl.innerHTML = `
+                    <div style="text-align:center; padding:20px 10px;">
+                        <i class="fa-solid fa-signal" style="font-size:36px; color:#6366f1; margin-bottom:12px; display:block;"></i>
+                        <h4 style="font-size:14px; margin-bottom:6px;">সিগন্যাল ও আইপি অপ্টিমাইজেশন</h4>
+                        <p style="font-size:11px; color:#4b5563; margin-bottom:15px;">বর্তমান সিগন্যাল লাটেন্সি কমিয়ে নতুন আইপি সেটআপ করা হচ্ছে।</p>
+                        <button onclick="runNetworkBoost()" style="padding:10px 20px; background:#6366f1; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">বூস্ট করুন (Boost Now)</button>
+                        <div id="boostResult" style="margin-top:15px; font-size:12px; font-weight:600;"></div>
+                    </div>
+                `;
+            } else if(toolName === 'ipchecker') {
+                titleEl.innerText = 'নেটওয়ার্ক আইপি চেকার';
+                let isDuplicate = previousIPsHistory.includes(currentAssignedIP);
+                contentEl.innerHTML = `
+                    <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:15px; text-align:center;">
+                        <i class="fa-solid fa-globe" style="font-size:30px; color:#06b6d4; margin-bottom:8px; display:block;"></i>
+                        <h4 style="font-size:13px; color:#4b5563; margin-bottom:4px;">বর্তমান আইপি এড্রেস:</h4>
+                        <div style="font-size:18px; font-weight:800; margin-bottom:12px; color:${isDuplicate ? '#dc2626' : '#16a34a'};" id="activeIpText">${currentAssignedIP}</div>
+                        <p style="font-size:11px; color:#4b5563; line-height:1.4;" id="ipStatusDesc">
+                            ${isDuplicate ? '⚠️ সতর্কবার্তা: এই আইপি এড্রেসটি পূর্বে ব্যবহৃত আইপির সাথে মিলে গেছে!' : '✅ নিরাপদ: এই আইপি এড্রেসটি সম্পূর্ণ নতুন ও ইউনিক।'}
+                        </p>
+                        <button onclick="generateNewIP()" style="margin-top:15px; padding:8px 16px; background:#06b6d4; color:#fff; border:none; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer;">নতুন আইপি জেনারেট করুন</button>
+                    </div>
+                `;
+            } else if(toolName === 'notepad') {
+                titleEl.innerText = 'সিকিউর নোটপ্যাড';
+                let savedNotes = localStorage.getItem('juokhor_notes') || '';
+                contentEl.innerHTML = `
+                    <p style="font-size:11px; color:#4b5563; margin-bottom:6px;">লেখা, নাম্বার, পাসওয়ার্ড, ইউজারনেম, ইমেইল সেভ করুন:</p>
+                    <textarea id="notepadArea" style="width:100%; height:220px; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; outline:none; background:#fff;" placeholder="এখানে আপনার গোপন নোট বা পাসওয়ার্ড লিখুন...">${savedNotes}</textarea>
+                    <button onclick="saveUserNotepad()" style="margin-top:10px; width:100%; padding:10px; background:#eab308; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;"><i class="fa-solid fa-floppy-disk"></i> নোট সেভ করুন</button>
+                `;
+            } else if(toolName === 'typo') {
+                titleEl.innerText = 'টাইপো ও ইনপুট ট্র্যাকার লোগ';
+                let logsHtml = globalTypoLogs.length === 0 ? '<p style="font-size:11px; color:#4b5563; text-align:center;">এখনো কোনো টাইপিং লগ রেকর্ড করা হয়নি।</p>' : globalTypoLogs.map(l => `<div style="background:#fff; border:1px solid #cbd5e1; padding:6px 10px; border-radius:6px; margin-bottom:6px; font-size:11px;"><b>[${l.time}]</b> ${l.text}</div>`).join('');
+                contentEl.innerHTML = `
+                    <p style="font-size:11px; color:#4b5563; margin-bottom:8px;">এই অ্যাপে আপনি বা অন্য কেউ যা টাইপ করেছেন তার অটোমেটিক লোগ:</p>
+                    <div style="max-height:250px; overflow-y:auto;" id="typoLogsList">${logsHtml}</div>
+                    <button onclick="globalTypoLogs=[]; openTool('typo'); showToast('লগ মুছে ফেলা হয়েছে');" style="margin-top:10px; width:100%; padding:8px; background:#dc2626; color:#fff; border:none; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">লগ ক্লিয়ার করুন</button>
+                `;
+            }
+        }
+
+        function closeToolPanel() {
+            document.getElementById('toolPanel').style.display = 'none';
+        }
+
+        function loadBrowserUrl() {
+            let url = document.getElementById('browserUrl').value;
+            document.getElementById('browserScreen').innerHTML = `<p style="color:#16a34a; font-size:12px;"><i class="fa-solid fa-check-circle" style="font-size:24px; display:block; margin-bottom:8px;"></i> সফলভাবে লোড হয়েছে: ${url}</p>`;
+            showToast('ব্রাউজার পেজ লোড সম্পন্ন');
+        }
+
+        function runNetworkBoost() {
+            previousIPsHistory.push(currentAssignedIP);
+            let rand1 = Math.floor(Math.random() * 150) + 50;
+            let rand2 = Math.floor(Math.random() * 200) + 10;
+            currentAssignedIP = `103.${rand1}.${rand2}.88`;
+            document.getElementById('boostResult').innerHTML = `<span style="color:#16a34a;">নেটওয়ার্ক অপ্টিমাইজড! নতুন আইপি: ${currentAssignedIP}</span>`;
+            showToast('নেটওয়ার্ক সফলভাবে বুস্ট হয়েছে!');
+        }
+
+        function generateNewIP() {
+            previousIPsHistory.push(currentAssignedIP);
+            let rand1 = Math.floor(Math.random() * 180) + 20;
+            let rand2 = Math.floor(Math.random() * 220) + 5;
+            currentAssignedIP = `103.${rand1}.${rand2}.11`;
+            openTool('ipchecker');
+            showToast('নতুন আইপি সফলভাবে সেট হয়েছে!');
+        }
+
+        function saveUserNotepad() {
+            let text = document.getElementById('notepadArea').value;
+            localStorage.setItem('juokhor_notes', text);
+            showToast('নোট সফলভাবে সেভ করা হয়েছে!');
+        }
+
+        // Auto track all user inputs for Typo Log
+        function trackTypoInputs() {
+            document.addEventListener('input', (e) => {
+                if(e.target && e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    let val = e.target.value;
+                    if(val && val.trim().length > 0) {
+                        let timeStr = new Date().toLocaleTimeString();
+                        // Avoid duplicates of last log
+                        if(globalTypoLogs.length === 0 || globalTypoLogs[globalTypoLogs.length - 1].text !== val) {
+                            globalTypoLogs.push({ time: timeStr, text: val });
+                        }
+                    }
+                }
+            });
+        }
+
+        // Live Search Filter
+        function handleLiveSearch(query) {
+            const filtered = casinoPosts.filter(p => p.title.toLowerCase().includes(query.toLowerCase()) || p.category.toLowerCase().includes(query.toLowerCase()));
+            const container = document.getElementById('latestHubContainer');
+            container.innerHTML = '';
+            
+            filtered.forEach(post => {
+                const card = document.createElement('div');
+                card.className = 'latest-card-item';
+                card.onclick = () => openPostDetails(post.id);
+                card.innerHTML = `
+                    <div class="latest-thumb" style="background-image: url('${post.image}')"></div>
+                    <div class="latest-info">
+                        <h4>${post.title}</h4>
+                        <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:4px;">
+                            <span style="color:#ca8a04;"><i class="fa-solid fa-star"></i> ${post.rating}</span>
+                            <span style="color:var(--primary-glow);"><i class="fa-solid fa-eye"></i> ${post.views}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Referral Copy & Share
+        function copyReferralLink() {
+            const linkInput = document.getElementById('userReferralLink');
+            linkInput.select();
+            navigator.clipboard.writeText(linkInput.value);
+            showToast('রেফারেল লিংক সফলভাবে কপি করা হয়েছে!');
+        }
+
+        function shareReferralLink() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'JuoKhor Referral',
+                    text: 'Join JuoKhor using my referral code 7492!',
+                    url: document.getElementById('userReferralLink').value,
+                }).catch(() => {});
+            } else {
+                copyReferralLink();
+            }
+        }
+
+        // Hamburger Menu Drawer
+        function toggleHamburger() {
+            document.getElementById('hamburgerDrawer').classList.toggle('open');
+        }
+
+        // Notification / Notice Modal
+        function openNotificationModal() {
+            document.getElementById('notifModal').style.display = 'flex';
+        }
+        function closeNotificationModal() {
+            document.getElementById('notifModal').style.display = 'none';
+        }
+
+        // View Switcher
+        function switchView(viewName) {
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+            if(viewName === 'home') document.getElementById('home-view').classList.add('active');
+            if(viewName === 'post-detail-view') document.getElementById('post-detail-view').classList.add('active');
+            if(viewName === 'category-full-view') document.getElementById('category-full-view').classList.add('active');
+            if(viewName === 'referral-view') document.getElementById('referral-view').classList.add('active');
+            if(viewName === 'auth') document.getElementById('auth-view').classList.add('active');
+            if(viewName === 'profile') document.getElementById('profile-view').classList.add('active');
+            if(viewName === 'tools-hub') document.getElementById('tools-hub-view').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function setActiveNav(element) {
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function checkAuthAndNavigate() {
+            if(isLoggedIn) {
+                switchView('profile');
+            } else {
+                switchView('auth');
+            }
+        }
+
+        function toggleAuthMode(mode) {
+            document.getElementById('loginCard').style.display = 'none';
+            document.getElementById('signupCard').style.display = 'none';
+            document.getElementById('recoveryCard').style.display = 'none';
+
+            if(mode === 'login') document.getElementById('loginCard').style.display = 'block';
+            if(mode === 'signup') document.getElementById('signupCard').style.display = 'block';
+            if(mode === 'recovery') document.getElementById('recoveryCard').style.display = 'block';
+        }
+
+        function handleLogin() {
+            const user = document.getElementById('loginUser').value;
+            if(!user) {
+                showToast('দয়া করে সঠিক ইউজারনেম বা মোবাইল দিন!');
+                return;
+            }
+            isLoggedIn = true;
+            showToast('সফলভাবে লগিন করা হয়েছে!');
+            document.getElementById('profileDisplayName').innerText = user;
+            document.getElementById('savedUserDisp').innerText = user;
+            switchView('profile');
+        }
+
+        function handleSignup() {
+            const user = document.getElementById('regUser').value;
+            const mobile = document.getElementById('regMobile').value;
+            if(!user || !mobile) {
+                showToast('দয়া করে সকল তথ্য পূরণ করুন!');
+                return;
+            }
+            isLoggedIn = true;
+            showToast('একাউন্ট সফলভাবে তৈরি হয়েছে!');
+            document.getElementById('profileDisplayName').innerText = user;
+            document.getElementById('savedUserDisp').innerText = user;
+            document.getElementById('savedMobDisp').innerText = mobile;
+            switchView('profile');
+        }
+
+        function handleRecovery() {
+            const rec = document.getElementById('recInput').value;
+            if(!rec) {
+                showToast('দয়া করে রেজিস্টার্ড ইউজারনেম দিন!');
+                return;
+            }
+            showToast('রিকভারি কোড আপনার মোবাইলে পাঠানো হয়েছে!');
+            toggleAuthMode('login');
+        }
+
+        function handleLogout() {
+            isLoggedIn = false;
+            showToast('লগআউট সফল হয়েছে');
+            switchView('home');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
